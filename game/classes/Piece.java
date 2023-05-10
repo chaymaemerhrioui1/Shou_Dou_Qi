@@ -1,14 +1,14 @@
-package com.game.classes;
-
+package game3.classes;
+import game3.tools.MoveException;
+import game3.tools.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import com.game.tools.MoveException;
-import com.game.tools.Point;
+
 
 public abstract class Piece {
 
-    // constantes qui definit les deplacements
+    // constantes qui définit les déplacements
     public static final int ADVANCE = 1;
     public static final int BACK = 2;
     public static final int RIGHT = 3;
@@ -21,7 +21,7 @@ public abstract class Piece {
     private Echiquier echiquier;
 
     /**
-     * default power c'est la force de chaque piece qui peut etre zero par default
+     * default power c'est la force de chaque animal qui peut etre zero par default
      */
     private int defaultPower;
     private int power;
@@ -83,7 +83,7 @@ public abstract class Piece {
     }
 
     /*
-     * on teste si il respecte les moves
+     * on teste si il respecte les deplacement
      */
     public int getSpecialMove() {
         return this.specialMove;
@@ -101,6 +101,7 @@ public abstract class Piece {
         return "Piece : " + this.pieceIcon() + " [ defaultPower=" + defaultPower + ", power=" + power + ", color="
                 + color + ", position=" + position + ", specialMove=" + specialMove + "]";
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -111,6 +112,7 @@ public abstract class Piece {
         result = prime * result + specialMove;
         return result;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -133,17 +135,18 @@ public abstract class Piece {
             return false;
         return true;
     }
-    /**
-     *
-     * permet de savoir la position de la piece
-     */
+
+
+
+     // permet de savoir la position de la piece
+
     public Point whereAmI() {
         return this.position;
     }
 
     public boolean amAlive() {
-        /**
-         *est une méthode de la classe "Piece" qui permet de vérifier si
+        /*
+         * permet de vérifier si
          *la pièce est toujours en vie sur le plateau de jeu
          * a méthode vérifie si la liste de pièces "Player1" de l'instance "echiquier" contient la pièce.
          * Sinon, la méthode vérifie si la liste de pièces "Player2" de l'instance "echiquier" contient la pièce.
@@ -159,7 +162,7 @@ public abstract class Piece {
     }
 
     public List<Point> getPossilesMoves() {
-        /**
+        /*
          * est une méthode de la classe "Piece" qui retourne une liste de tous les déplacements possibles pour la pièce en question sur le plateau de jeu.
          */
 
@@ -175,7 +178,7 @@ public abstract class Piece {
 
         }
 
-        /**
+        /*
          * pour ne pas etre dans le trone d'un animal
          */
         if (this.echiquier.getTurn() == -1) {
@@ -219,7 +222,7 @@ public abstract class Piece {
 
     public Point getPositionIfCanMove(int direction, int nbrCase) throws MoveException {
         /**
-         *est une méthode qui renvoie la position d'une pièce d'un jeu d'échecs chinois,
+         *est une méthode qui renvoie la position d'une pièce
          *  si elle peut se déplacer dans une certaine direction d'un certain nombre de cases.
          */
 
@@ -257,45 +260,45 @@ public abstract class Piece {
 
         /**
          * Si la nouvelle position est sur l'eau, la méthode vérifie si la pièce peut effectuer
-         * un mouvement spécial (si elle est un Rat ou un Lion), dans le cas contraire elle déclenche une exception
+         * un mouvement spécial (si elle est un Rat ou un Lion ou tigre), dans le cas contraire elle déclenche une exception
          */
 
         if (echiquier.isPointWater(newPosition)) {
             /**
-             * on doit vérifier que la piece deplacée est la souris
-             * ansi que le lion et le tigre peuvent sauter la riviere
-             * sinon si la piece est ni le rat ni le lion ni le tigre on va declancher une erreur
+             * On doit vérifier que la pièce déplacée est la souris.
+             * Seuls le lion et le tigre peuvent sauter la rivière.
+             * Sinon, si la pièce n'est ni la souris, ni le lion, ni le tigre, une erreur sera déclenchée.
              */
-            // si un Rat
+            // Si c'est un Rat
             if (this.getSpecialMove() == 1) {
-                // laisser pass
-                System.out.println("je suis Une " + this.pieceIcon() + " je veux traverser l'eau at " + newPosition);
-            } else if (this.getSpecialMove() == 2) {
-                // si le tigre ou le lion et que la souris est dans la rivière
-                if ((this.pieceIcon() == "lionB" || this.pieceIcon() == "lionA"|| this.pieceIcon() == "tigreB"|| this.pieceIcon() == "tigreA" +
-                        "") && echiquier.isPointWater(this.position)) {
-                    System.out.println("Le tigre ou le lion ne peut plus sauter la rivière");
-                    throw new MoveException();
-                } else {
-                    /**
-                     * le saut de la riviere du lion ou du tigre
-                     */
-                    int nbrX = newPosition.getX() - this.position.getX();
-                    int nbrY = newPosition.getY() - this.position.getY();
-                    System.out.println("From " + this.position + "To " + newPosition);
-                    System.out.println("Nbr X " + nbrX + " nbr Y " + nbrY);
+                // le rat peut traverser la riviere
+                System.out.println("Je suis une " + this.pieceIcon() + ", je veux traverser l'eau à " + newPosition);
+                if (this.getSpecialMove() == 2) {
+                    // Si c'est le tigre ou le lion et que la souris est dans la rivière donc ils peuvent pas sauter
+                    if (("T".equals(this.pieceIcon()) || "L".equals(this.pieceIcon())) && echiquier.isPointWater(this.position)) {
+                        System.out.println("Le tigre ou le lion ne peut plus sauter la rivière");
+                        throw new MoveException();
+                    }
+                    else {
+                        //les coordonnées du saut de chaqu'un du tigre et le lion
+                        int nbrX = newPosition.getX() - this.position.getX();
+                        int nbrY = newPosition.getY() - this.position.getY();
+                        System.out.println("From " + this.position + " to " + newPosition);
+                        System.out.println("Nbr X: " + nbrX + ", Nbr Y: " + nbrY);
 
-                    newPosition.setX(newPosition.getX() + nbrX * 3);
-                    newPosition.setY(newPosition.getY() + nbrY * 2);
-                    System.out.println("je suis Une " + this.pieceIcon() + "  je veux traverser l'eau at " + newPosition);
+                        newPosition.setX(newPosition.getX() + nbrX * 3);
+                        newPosition.setY(newPosition.getY() + nbrY * 2);
+                        System.out.println("Je suis une " + this.pieceIcon() + ", je veux traverser l'eau à " + newPosition);
+                    }
+
                 }
-            } else {
-                System.out.println("vous n'avez pas le droit de traverser la revierre");
-                throw new MoveException();
-
             }
-
+            else {
+                System.out.println("Vous n'avez pas le droit de traverser la rivière");
+                throw new MoveException();
+            }
         }
+
         // Ce code vérifie si la nouvelle position est en dehors de
         // l'échiquier en appelant la méthode isPointInEchiquier de l'objet echiquier
 
@@ -354,7 +357,7 @@ public abstract class Piece {
 
     public void movePiece(int direction, int nbrCase) throws MoveException {
         /**
-         * apres le choix de piece on va le deplacer & synchro with echiquier pour la
+         * apres le choix de piece on va le deplacer et synchro avec echiquier pour la
          * mise ajour
          */
 
@@ -369,8 +372,8 @@ public abstract class Piece {
 
         this.position = newPostion;
 
-        /***
-         * @param point on teste si le nouveau deplacement si oui set power to zero
+        /*
+         * point on teste si le nouveau deplacement si oui set power to zero
          *              sinon default power;
          */
         System.out.println("Player" + echiquier.getTurn() + " Piece " + this.pieceIcon() + " moved From"
@@ -382,12 +385,12 @@ public abstract class Piece {
     }
 
     /**
-     * pour respecter le mouve & special move pour chaque animaux && respecte la
-     * place du trone
+     * pour respecter le mouvement  et special movement  pour chaque animaux && respecte la
+     * place du sanctaire
      */
     public abstract void isPossibleMove();
 
-    public void randomMove() {
+    public void randomMove() {  //permet à une pièce de se déplacer de manière aléatoire parmi les cases où elle peut se déplacer.
 
         List<Point> possibleMoves = this.getPossilesMoves();
         if (this.getPossilesMoves().size() != 0) {
@@ -412,7 +415,7 @@ public abstract class Piece {
             this.amInPiege();
 
             /**
-             * teste si trone is good et ya des pieces
+             * changer de joueur
              */
             // echiquier.isTroneGood();
             echiquier.switchPlayer();
