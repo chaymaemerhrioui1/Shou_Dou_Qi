@@ -1,26 +1,5 @@
-try {
-    choosenPiece.movePiece(direction, 0);
-    echiquier.enregistrerDeplacement(choosenPiece, choosenPiece.getPosition(), choosenPiece.getDestination());
-} catch (MoveException | NullPointerException e) {
-    System.out.println("Cant Move");
-}
-Console 
-package com.console;
 
-import java.util.Random;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.game.classes.Echiquier;
-import com.game.classes.Lion;
-import com.game.classes.Loup;
-import com.game.classes.Piece;
-import com.game.tools.MoveException;
-import com.game.tools.Point;
-
-public class ConsoleClass {
-
+public class ConsoleClass{
     private static int direction;
 
     public static void MachineContreMachine(Echiquier echiquier) {
@@ -30,19 +9,17 @@ public class ConsoleClass {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
     }
 
-    /***
-     *
-     * il faut annuler les espaces dans string et mettre Tig_B
-     */
+
+
+
     public static void HumanContreHuman( Echiquier echiquier) {
         while (true) {
-            System.out.println("saisir votre Commande player"+echiquier.getTurn());
+            System.out.println("saisir votre Commande , joueur  : "+echiquier.getTurn());
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
 
@@ -51,30 +28,27 @@ public class ConsoleClass {
             // echiquier.switchPlayer();
             Piece choosenPiece = echiquier.getPieceByLabel(trait[0]);
             if (choosenPiece != null && trait.length == 2) {
-                System.out.println("you choose : " + choosenPiece);
-                System.out.println("to make this move " + trait[1]);
+                System.out.println("Vous avez choisi : " + choosenPiece);
+                System.out.println("Pour faire ce mouvement " + trait[1]);
 
-                if ("a".equals(trait[1])) {
+                if ("h".equals(trait[1])) {
                     direction = 1;
                 } else if ("b".equals(trait[1])) {
                     direction = 2;
-                } else if ("r".equals(trait[1])) {
+                } else if ("d".equals(trait[1])) {
                     direction = 3;
-                } else if ("l".equals(trait[1])) {
+                } else if ("g".equals(trait[1])) {
                     direction = 4;
                 }
-
-
-
                 try {
 
                     choosenPiece.movePiece(direction, 0);
                 } catch (MoveException | NullPointerException e) {
-                    System.out.println("Cant Move");
+                    System.out.println("Ne peut pas bouger");
                 }
 
             } else {
-                System.out.println("Cant Find Piece Or command not correct");
+                System.out.println("On ne peut pas trouvé cette piece ou votre commande est incorrecte");
             }
 
             echiquier.showEchiquier();
@@ -94,13 +68,13 @@ public class ConsoleClass {
                 if (choosenPiece != null && trait.length == 2) {
                     String move = trait[1];
                     int direction = 0;
-                    if ("a".equals(move)) {
+                    if ("h".equals(move)) {
                         direction = 1;
                     } else if ("b".equals(move)) {
                         direction = 2;
-                    } else if ("r".equals(move)) {
+                    } else if ("d".equals(move)) {
                         direction = 3;
-                    } else if ("l".equals(move)) {
+                    } else if ("g".equals(move)) {
                         direction = 4;
                     }
 
@@ -118,7 +92,37 @@ public class ConsoleClass {
                     System.out.println("Impossible de trouver la pièce ou commande incorrecte.");
                 }
             } else {
-                echiquier.randomTurn();
+                // La machine joue
+                Piece[] pieces = echiquier.getPieceByTurn().toArray(new Piece[0]);
+                Piece choosenPiece = pieces[(int) (Math.random() * pieces.length)];
+                int direction = (int) (Math.random() * 4) + 1;
+
+                try {
+                    Point depart = choosenPiece.getPosition();
+                    choosenPiece.movePiece(direction, 0);
+                    Point arrivee = choosenPiece.getPosition();
+
+                    // Enregistrer le déplacement dans la base de données
+                    echiquier.enregistrerDeplacement(choosenPiece, depart, arrivee);
+                } catch (MoveException | NullPointerException e) {
+                    // Si le déplacement est impossible, on en choisit un autre aléatoirement
+                    while (true) {
+                        choosenPiece = pieces[(int) (Math.random() * pieces.length)];
+                        direction = (int) (Math.random() * 4) + 1;
+                        try {
+                            Point depart = choosenPiece.getPosition();
+                            choosenPiece.movePiece(direction, 0);
+                            Point arrivee = choosenPiece.getPosition();
+
+                            // Enregistrer le déplacement dans la base de données
+                            echiquier.enregistrerDeplacement(choosenPiece, depart, arrivee);
+
+                            break;
+                        } catch (MoveException | NullPointerException ex) {
+                            // Si le déplacement est encore impossible, on continue la boucle
+                        }
+                    }
+                }
             }
             echiquier.showEchiquier();
         }
@@ -127,11 +131,7 @@ public class ConsoleClass {
 
     public static void main(String[] args) {
 
-
-
-
         Echiquier echiquier = Echiquier.getInstance();
-
 
         System.out.println("mettre votre choix");
         System.out.println("1-Human VS Human");
@@ -142,12 +142,11 @@ public class ConsoleClass {
         Scanner sc=new Scanner(System.in);
         choose=sc.nextInt();
         echiquier.showEchiquier();
-        System.out.println("The game staring in 3 sec......\n");
+        System.out.println("Le jeu va commencera dans 5 secondes......\n");
 
         try {
-            Thread.sleep(3000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         switch (choose) {
@@ -163,1145 +162,110 @@ public class ConsoleClass {
             case 4:
                 System.exit(0);
                 break;
-
             default:
                 break;
         }
 
-        //MachineContreMachine(echiquier);
-        //HumanContreHuman(echiquier);
-        //HumanContreMachine(echiquier);
-        /*
-         * System.out.println(lion.pieceIcon());
-         * System.out.println(lion.getPossilesMoves());
-         * System.out.println("this is choose by Label : " +
-         * echiquier.getPieceByLabel("Tig B"));
-         */
-
-
-//    Piece pos=echiquier.getPieceByLabel("Tig B");
-//    pos.randomMove();
-
-        //random game
-      /* while (true) {
-         echiquier.randomTurn();
-         echiquier.showEchiquier();
-         try {
-            Thread.sleep(10);
-         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         }
-      }
-*/
-
-
-        //pos.randomMove();
-        //echiquier.showEchiquier();
-
-        // user to user
-      /*
-      while (true) {
-         System.out.println("saisir votre Commande player"+echiquier.getTurn());
-         Scanner scanner = new Scanner(System.in);
-         String command = scanner.nextLine();
-
-         String[] trait = command.split(",");
-
-         // echiquier.switchPlayer();
-         Piece choosenPiece = echiquier.getPieceByLabel(trait[0]);
-         if (choosenPiece != null && trait.length == 2) {
-            System.out.println("you choose : " + choosenPiece);
-            System.out.println("to make this move " + trait[1]);
-
-            if ("a".equals(trait[1])) {
-               direction = 1;
-            } else if ("b".equals(trait[1])) {
-               direction = 2;
-            } else if ("r".equals(trait[1])) {
-               direction = 3;
-            } else if ("l".equals(trait[1])) {
-               direction = 4;
-            }
-
-            try {
-
-               choosenPiece.movePiece(direction, 0);
-            } catch (MoveException | NullPointerException e) {
-               System.out.println("Cant Move");
-            }
-
-         } else {
-            System.out.println("Cant Find Piece Or command not correct");
-         }
-
-         echiquier.showEchiquier();
-      }*/
-
-        /***
-         * try move done
-         */
-        /*
-         * try { lion.movePiece(1, 0); } catch (MoveException e) { // TODO
-         * Auto-generated catch block System.out.println("Cant Move"); }
-         *
-         *
-         * echiquier.showEchiquier();
-         */
-
-        /*
-         * Scanner s = new Scanner(System.in);
-         *
-         * echequier.showEchequier();
-         *
-         * while (true) {
-         *
-         * // Lire la commande au clavier String commande = s.nextLine();
-         *
-         * // V�ifier que la commande a �t� correctement saisie Matcher m =
-         * Pattern.compile("^([A,B,C]) (a|b|t|bt|dta|dtb|dba|dbb)$").matcher(commande);
-         *
-         * if (m.matches()) {
-         *
-         * String pieceString = m.group(1); String directionString = m.group(2); int
-         * direction = 0;
-         *
-         * if ("a".equals(directionString)) { direction = Piece.ADVANCE; } else if
-         * ("b".equals(directionString)) { direction = Piece.BACK; } else if
-         * ("t".equals(directionString)) { direction = Piece.TOP; } else if
-         * ("bt".equals(directionString)) { direction = Piece.BOTTOM; } else if
-         * ("dta".equals(directionString)) { direction = Piece.DIAG_TOP_ADVANCE; } else
-         * if ("dtb".equals(directionString)) { direction = Piece.DIAG_TOP_BACK; } else
-         * if ("dba".equals(directionString)) { direction = Piece.DIAG_BOTTOM_BACK; }
-         * else if ("dbb".equals(directionString)) { direction = Piece.DIAG_BOTTOM_BACK;
-         * }
-         *
-         * try {
-         *
-         * Piece piece = echequier.getPieceWithColor(echequier.getTour(), pieceString);
-         * if (piece != null) { piece.seDeplacer(direction, 1);
-         *
-         * } else { System.out.println("La piece n'existe plus");
-         *
-         * } } catch (ImpossibleDeplacementException e) {
-         * System.out.println("D�placement impossible"); }
-         *
-         * } else if ("exit".equals(commande)) { System.exit(0); }
-         *
-         * else { System.out.println("commande incorrecte"); }
-         *
-         * echequier.showEchequier(); }
-         *
-         */
-
-        // Echiquier echiquier=new Echiquier();
-
-        // echiquier.showEchiquier();
-        // System.out.println(echiquier.getTurn());
-        // echiquier.switchPlayer();
-//    System.out.println(echiquier.isLose());
-
-//    Piece piece=new Loup();
-//    System.out.println(piece.pieceIcon());
-        /*
-         * System.out.println("*****************************"); Piece lionN = new
-         * Lion(7, -1, new Point(0, 6), 2, echiquier); Piece
-         * lin=echiquier.getPieceAt(new Point(0,6));
-         *
-         * echiquier.removePiece(lionN);
-         *
-         * echiquier.showEchiquier();
-         *
-         */
     }
+}    ceci le code de mon application console de mon jeu je voulais ajouter autre methode machine contre machine via un reseaue connecte et voila les classe pour connecter avec server mais par des messages je voulais connecter avec le jeu c est a dire le joueur va jouer avec autre joueuer via reseau                                                                                                                                                                                                               
+
+import java.net.*;
+import java.util.Scanner;
+
+
+import java.io.*;
+
+public class ClientProg {
+	
+	
+	// initialize socket and input output streams
+	private Socket socket = null;
+
+	private ObjectOutputStream out;
+
+	private ObjectInputStream in;
+
+	private static ClientProg instance;
+
+	// constructor to put ip address and port
+	private ClientProg(String address, int port) {
+
+		try {
+
+			socket = new Socket(address, port);
+
+			// sends output to the socket
+			out = new ObjectOutputStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStream());
+
+			System.out.println("Connected to server");
+
+		} catch (Exception ex) {
+			throw new NetworkException(ex);
+		}
+
+	}
+
+	public static ClientProg getConnnection(String pIpAdress, int port) {
+
+		if (instance == null) {
+			instance = new ClientProg(pIpAdress, port);
+
+		}
+
+		return instance;
+
+	}
+
+	public void close() {
+		try {
+			out.writeObject("end_connection");
+			out.flush();
+			out.close();
+			in.close();
+			socket.close();
+		} catch (Exception ex) {
+			throw new NetworkException(ex);
+		}
+	}
+
+	public Object send(String pMessage) {
+
+		Object obj;
+		try {
+
+			out.writeObject(pMessage);
+			out.flush();
+			obj = in.readObject();
+
+		} catch (Exception ex) {
+			throw new NetworkException(ex);
+		}
+		return obj;
+	}
+
+	public static void main(String args[]) {
+		
+
+		Scanner sc = new Scanner(System.in);
+		System.out.println("please entrer the network IP Adresse of the server number (for localhost the ip adresse is: 127.0.0.1)");
+		String ipAdresse =  sc.next().trim();
+		System.out.println("please entrer the network port number user by the server (Example: 5000)");
+		int port  = sc.nextInt();
+
+		//connect to server
+		ClientProg client = ClientProg.getConnnection(ipAdresse, port);		
+		Scanner s = new Scanner(System.in);
+		while (true) {
+			System.out.println("Pleaser write your message:");
+			//read message
+			String line = s.nextLine();
+			//send message
+			Object rep = client.send(line);
+			//print server response
+			System.out.println(rep);
+
+		}
+
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-Echiquier 
-package com.game.classes;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.sql.*;
-
-import com.game.tools.Point;
-
-public class Echiquier {
-    private static Echiquier echiquier;
-    private List<Piece> player1 = new ArrayList<Piece>();
-    private List<Piece> player2 = new ArrayList<Piece>();
-    private int turn = -1;// -1-->player 1 , 1--->player 2
-    private List<Point> listPiegePlayer1 = new ArrayList<Point>();
-    private List<Point> listPiegePlayer2 = new ArrayList<Point>();
-    private List<Point> listWaterPlace = new ArrayList<Point>();
-    private Connection con;
-    private Statement st;
-    /**
-     * TODO ajuter les places du trone
-     */
-
-    /**
-     * il faut instancier les postion ici dans le constructeur
-     * this  référence à l'objet courant dans lequel il est utilisé
-     */
-
-    public Echiquier() {
-
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/jeu xou dou qi", "root", "");
-            st = con.createStatement();
-            System.out.println("Bienvenue <_>,votre connection est bien connecte !!");
-        } catch (Exception ex) {
-            System.out.println("Error" + ex);
-        }
-        Piece lionB = new Lion(7, -1, new Point(0, 6), 2, this);
-        Piece tigreB = new Tigre(6, -1, new Point(0, 0), 2, this);
-        Piece panthereB = new Panthere(5, -1, new Point(2, 4), 0, this);
-        Piece loupB = new Loup(4, -1, new Point(2, 2), 0, this);
-        Piece chienB = new Chien(3, -1, new Point(1, 5), 0, this);
-        Piece chatB = new Chat(2, -1, new Point(1, 1), 0, this);
-        Piece ratB = new Rat(1, -1, new Point(2, 6), 1, this);
-        Piece elephantB = new Elephant(8, -1, new Point(2, 0), 0, this);
-        Point piege1B = new Point(0, 2);
-        Point piege2B = new Point(1, 3);
-        Point piege3B = new Point(0, 4);
-        // TODO ajoute emplacement du trone point(0,3);
-
-        player1.add(elephantB);
-        player1.add(chienB);
-        player1.add(panthereB);
-        player1.add(tigreB);
-        player1.add(ratB);
-        player1.add(chatB);
-        player1.add(loupB);
-        player1.add(lionB);
-
-        listPiegePlayer1.add(piege1B);
-        listPiegePlayer1.add(piege3B);
-        listPiegePlayer1.add(piege2B);
-
-        Piece lionN = new Lion(7, 1, new Point(8, 0), 2, this);
-        Piece tigreN = new Tigre(6, 1, new Point(8, 6), 2, this);
-        Piece panthereN = new Panthere(5, 1, new Point(6, 2), 0, this);
-        Piece loupN = new Loup(4, 1, new Point(6, 4), 0, this);
-        Piece chienN = new Chien(3, 1, new Point(7, 1), 0, this);
-        Piece chatN = new Chat(2, 1, new Point(7, 5), 0, this);
-        Piece ratN = new Rat(1, 1, new Point(6, 0), 1, this);
-        Piece elephantN = new Elephant(8, 1, new Point(6, 6), 0, this);
-        Point piege1N = new Point(8, 4);
-        Point piege2N = new Point(7, 3);
-        Point piege3N = new Point(8, 2);
-        // TODO ajoute emplacement du trone point(0,3);
-
-        player2.add(elephantN);
-        player2.add(chienN);
-        player2.add(panthereN);
-        player2.add(tigreN);
-        player2.add(ratN);
-        player2.add(chatN);
-        player2.add(loupN);
-        player2.add(lionN);
-
-        listPiegePlayer2.add(piege1N);
-        listPiegePlayer2.add(piege3N);
-        listPiegePlayer2.add(piege2N);
-
-        Point water1 = new Point(3, 1);
-        Point water2 = new Point(3, 2);
-        Point water3 = new Point(4, 1);
-        Point water4 = new Point(4, 2);
-        Point water5 = new Point(5, 1);
-        Point water6 = new Point(5, 2);
-        Point water7 = new Point(3, 4);
-        Point water8 = new Point(3, 5);
-        Point water9 = new Point(4, 4);
-        Point water10 = new Point(4, 5);
-        Point water11 = new Point(5, 4);
-        Point water12 = new Point(5, 5);
-
-        listWaterPlace.add(water12);
-        listWaterPlace.add(water11);
-        listWaterPlace.add(water10);
-        listWaterPlace.add(water9);
-        listWaterPlace.add(water8);
-        listWaterPlace.add(water7);
-        listWaterPlace.add(water6);
-        listWaterPlace.add(water5);
-        listWaterPlace.add(water4);
-        listWaterPlace.add(water3);
-        listWaterPlace.add(water2);
-        listWaterPlace.add(water1);
-
-    }
-
-    public static Echiquier getInstance() {
-        if (Echiquier.echiquier == null)
-            echiquier = new Echiquier();
-        return echiquier;
-    }
-
-    public List<Piece> getPlayer1() {
-        return player1;
-    }
-
-    public void setPlayer1(List<Piece> player1) {
-        this.player1 = player1;
-    }
-
-    public List<Piece> getPlayer2() {
-        return player2;
-    }
-
-    public void setPlayer2(List<Piece> player2) {
-        this.player2 = player2;
-    }
-
-    public int getTurn() {
-        return turn;
-    }
-
-    public void setTurn(int turn) {
-        this.turn = turn;
-    }
-
-    public List<Point> getListPiegePlayer1() {
-        return listPiegePlayer1;
-    }
-
-    public void setListPiegePlayer1(List<Point> listPiegePlayer1) {
-        this.listPiegePlayer1 = listPiegePlayer1;
-    }
-
-    public List<Point> getListPiegePlayer2() {
-        return listPiegePlayer2;
-    }
-
-    public void setListPiegePlayer2(List<Point> listPiegePlayer2) {
-        this.listPiegePlayer2 = listPiegePlayer2;
-    }
-
-    public List<Point> getListWaterPlace() {
-        return listWaterPlace;
-    }
-
-    public void setListWaterPlace(List<Point> listWaterPlace) {
-        this.listWaterPlace = listWaterPlace;
-    }
-
-    public void switchPlayer() {
-        this.turn = -this.turn;
-        if (isLose()) {
-            this.showEchiquier();
-            System.err.println("the player " + this.turn + " lose");
-            System.exit(0);
-        }
-    }
-
-    public boolean isPointInEchiquier(Point position) {
-        /**
-         * respecter les dimesntion du echiquier sinon declancher une exception dans
-         * piece
-         *
-         * @param un Point
-         */
-
-        return (position.getX() >= 0 && position.getX() <= 8) && (position.getY() >= 0 && position.getY() <= 6);
-    }
-
-    public boolean isPointWater(Point position) {
-        /**
-         * @param point savoir si une du water test suur la liste
-         */
-
-        return listWaterPlace.contains(position);
-    }
-
-    public boolean isPiege(Point posiPoint) {
-        /**
-         * @param un point test sur la list pour rendre power zero
-         */
-        if (turn == -1) {
-            return listPiegePlayer2.contains(posiPoint);
-        } else {
-            return listPiegePlayer1.contains(posiPoint);
-        }
-    }
-
-    public boolean isLose() {
-        /**
-         * pour chaque tour de switch user on va teste list ds pices ou la trone still
-         * existe
-         */
-
-        if (turn == -1) {
-            if (this.player1.size() == 0 || !this.isTroneGood()) {
-                return true;
-            } else {
-                return false;
-            }
-
-        }
-
-        else {
-            if (this.player2.size() == 0 || !this.isTroneGood()) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-    }
-
-    public boolean isTroneGood() {
-        /**
-         * on va teste ou on va mettre un point si adversaire attient l'autre va perdu
-         * on va tester le point du trone is Vide pour chaque joueur
-         *
-         */
-        if (turn == -1) {
-            /**
-             * TODO met la point du trone pour chaque user
-             */
-            return isPointVide(new Point(0, 3));
-        } else {
-            return isPointVide(new Point(8, 3));
-        }
-
-    }
-
-    public boolean isPointVide(Point pointTest) {
-        /**
-         * @param Point si le point est vide apres l'iteration du listPiece et sa
-         *              position
-         */
-        boolean isVide = true;
-        for (Piece point : player1) {
-            if (point.getPosition().equals(pointTest)) {
-                isVide = false;
-                break;
-            }
-        }
-
-        for (Piece piece : player2) {
-            if (piece.getPosition().equals(pointTest)) {
-                isVide = false;
-                break;
-            }
-        }
-
-        return isVide;
-    }
-
-    public boolean isThereMyPiece(Point pointTest) {
-        /**
-         * @param Point si le point est vide apres l'iteration du listPiece et sa
-         *              position
-         */
-        boolean isVide = true;
-        if (this.turn == -1) {
-            for (Piece point : player1) {
-                if (point.getPosition().equals(pointTest)) {
-                    isVide = false;
-                    break;
-                }
-            }
-        } else {
-            for (Piece piece : player2) {
-                if (piece.getPosition().equals(pointTest)) {
-                    isVide = false;
-                    break;
-                }
-            }
-
-        }
-        return isVide;
-    }
-
-    public Piece choosePieceAt(Point point) {
-        /**
-         * pour chosir une piece pour faire les traimtment et sedeplacer sinon on
-         * declanche une exception s'i existe pas
-         */
-
-        Piece piece = null;
-        if (turn == -1) {
-            for (Piece it : player1) {
-                if (it.getPosition().equals(point)) {
-                    piece = it;
-                }
-
-            }
-        }
-
-        else {
-            for (Piece it : player2) {
-                if (it.getPosition().equals(point)) {
-                    piece = it;
-                }
-
-            }
-        }
-
-        return piece;
-
-    }
-
-    public void removePiece(Piece pieceRmv) {
-        /**
-         * pour elemener dans unn deplacement du l'adversaire donc on va jouer sur le
-         * role
-         */
-        /*
-         * if(this.turn==-1) { this.player2.remove(pieceRmv); } else {
-         * this.player1.remove(pieceRmv); }
-         */
-        this.player1.remove(pieceRmv);
-        this.player2.remove(pieceRmv);
-
-    }
-
-    public void updatePosition() {
-        /***
-         * pour faire la mise ajour de tout les pieces TODO pour afficher l'echquier et
-         * met la mise a jour
-         */
-    }
-
-    public void showEchiquier() {
-        /**
-         * pour afficher la console TODO met la console d'affichage
-         */
-
-        /**
-         *
-         * String tes=""; tes=tes+" "; System.out.println(tes.substring(0,8));
-         */
-
-        for (int j = 8; j >= 0; j--) {
-            for (int i = 0; i < 7; i++) {
-                String string=" ";
-                if ((j >= 3 && j <= 5) && (i == 1 || i == 2 || i == 4 || i == 5)) {
-                    string="W ";
-                }
-
-                if ((j == 8 && i == 4) || (j == 7 && i == 3) || (j == 8 && i == 2)) {
-
-                    string="PN ";
-                }
-
-                if ((j == 0 && i == 2) || (j == 1 && i == 3) || (j == 0 && i == 4)) {
-
-                    string="PB ";
-                }
-
-                if (j == 0 && i == 3) {
-
-                    string="TB ";
-                }
-
-                if (j == 8 && i == 3) {
-
-                    string="TN ";
-                }
-
-                Piece p = this.getPieceAt(new Point(j, i));
-                if (p != null) {
-                    //System.out.print(p.pieceIcon());
-                    string=string+" "+p.pieceIcon();
-                }
-
-                string=string+"                          ";
-                System.out.print(string.substring(0, 12)+" ||");
-
-
-            }
-            System.out.println();
-            System.out.println("-----------------------------------------------------------------------------------------------------------------");
-            System.out.println();
-            // System.out.println("---------------------------------------------------------");
-        }
-        System.out.println("*******piece Restant*******player -1 : "+this.player1.size()+" ************************player 1:"+this.player2.size()+"********************************************************");
-    }
-
-    public Piece getPieceAt(Point pointTest) {
-        /**
-         * @param point pour facilter traitement de deplacement
-         */
-
-        for (Piece it : player1) {
-            if (it.getPosition().equals(pointTest)) {
-                return it;
-            }
-        }
-
-        for (Piece it : player2) {
-            if (it.getPosition().equals(pointTest)) {
-                return it;
-            }
-        }
-
-        return null;
-    }
-
-    public List<Piece> getPieceByTurn() {
-        if (this.turn == -1) {
-            return this.player1;
-        } else {
-            return this.player2;
-        }
-    }
-
-    public Piece getPieceByLabel(String label) {
-        Piece choosenPiece = null;
-        List<Piece> listPiece = this.getPieceByTurn();
-        for (Piece piece : listPiece) {
-            if (piece.pieceIcon().equals(label)) {
-                return piece;
-            }
-        }
-
-        return choosenPiece;
-    }
-
-    public void randomTurn() {
-        if (this.getTurn() == -1) {
-            int pieceI = new Random().nextInt(this.player1.size());
-            Piece randPiece = this.player1.get(pieceI);
-            randPiece.randomMove();
-        } else {
-            int pieceI = new Random().nextInt(this.player2.size());
-            Piece randPiece = this.player2.get(pieceI);
-            randPiece.randomMove();
-        }
-    }
-
-    public Piece getPieceAt(int row, int col) {
-
-        return null;
-    }
-    public List<Piece> getPieces() {
-        List<Piece> pieces = new ArrayList<Piece>();
-        pieces.addAll(this.player1);
-        pieces.addAll(this.player2);
-        return pieces;
-    }
-    public boolean estDansEau(Point point) {
-        for (Point waterPlace : this.listWaterPlace) {
-            if (point.equals(waterPlace)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-
-    //***********************************************
-
-    public void enregistrerDeplacement(Piece piece, Point depart, Point arrivee) {
-        try {
-            // Établir une connexion à la base de données
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/jeu xou dou qi", "root", "");
-
-            // Préparer la requête SQL pour insérer le déplacement dans la base de données
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO deplacements (piece, depart_x, depart_y, arrivee_x, arrivee_y) VALUES (?, ?, ?, ?, ?)");
-            preparedStatement.setString(1, piece.toString());
-            preparedStatement.setInt(2, depart.getX());
-            preparedStatement.setInt(3, depart.getY());
-            preparedStatement.setInt(4, arrivee.getX());
-            preparedStatement.setInt(5, arrivee.getY());
-
-            // Exécuter la requête SQL
-            preparedStatement.executeUpdate();
-
-
-            // Fermer la connexion à la base de données
-            connection.close();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-}
-
-
-
-
-
-Piece 
-package com.game.classes;
-import com.game.tools.MoveException;
-import com.game.tools.Point;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-
-public abstract class Piece {
-
-    // constantes qui d�finit les d�placements
-    public static final int ADVANCE = 1;
-    public static final int BACK = 2;
-    public static final int RIGHT = 3;
-    public static final int LEFT = 4;
-
-    // ajout de classe de represnter une classe
-    // Directions est un tableau qui contient les mouvements possibles d'une piece
-    public static final int[] DIRECTIONS = { ADVANCE, BACK, RIGHT, LEFT };
-
-    protected Echiquier echiquier;
-
-    /**
-     * default power c'est la force de chaque piece qui peut etre zero par default
-     */
-    protected int defaultPower;
-    protected int power;
-    protected int color;
-    protected Point position;
-    protected int specialMove;
-
-    public Piece() {
-
-    }
-
-    public Piece(int power, int color, Point position, int specialMove, Echiquier ech) {
-        this.power = power;
-        this.color = color;
-        this.position = position;
-        this.specialMove = specialMove;
-        this.defaultPower = power;
-        this.echiquier = ech;
-    }
-// les getters er setters de chque attribut
-    public Echiquier getEchiquier() {
-        return echiquier;
-    }
-
-    public void setEchiquier(Echiquier echiquier) {
-        this.echiquier = echiquier;
-    }
-
-    public int getPower() {
-        return power;
-    }
-
-    public void setPower(int power) {
-        this.power = power;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
-    }
-
-    public Point getPosition() {
-        return position;
-    }
-
-    public void setPosition(Point position) {
-        this.position = position;
-    }
-
-    public int getDefaultPower() {
-        return defaultPower;
-    }
-
-    public void setDefaultPower(int defaultPower) {
-        this.defaultPower = defaultPower;
-    }
-
-    /*
-     * on teste si il respecte les moves
-     */
-    public int getSpecialMove() {
-        return this.specialMove;
-    }
-
-    /**
-     *cela concerne les mouvements spéciales du rat , tigre et lion
-     *
-     */
-    public void setSpecialMove(int specialMove) {
-        this.specialMove = specialMove;
-    }
-
-    public String toString() {
-        return "Piece : " + this.pieceIcon() + " [ defaultPower=" + defaultPower + ", power=" + power + ", color="
-                + color + ", position=" + position + ", specialMove=" + specialMove + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + color;
-        result = prime * result + defaultPower;
-        result = prime * result + ((position == null) ? 0 : position.hashCode());
-        result = prime * result + specialMove;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Piece other = (Piece) obj;
-        if (color != other.color)
-            return false;
-        if (defaultPower != other.defaultPower)
-            return false;
-        if (position == null) {
-            if (other.position != null)
-                return false;
-        } else if (!position.equals(other.position))
-            return false;
-        if (specialMove != other.specialMove)
-            return false;
-        return true;
-    }
-
-    /**
-     *
-     * permet de savoir la position de la piece
-     */
-    public Point whereAmI() {
-        return this.position;
-    }
-
-    public boolean amAlive() {
-        /**
-         *est une méthode de la classe "Piece" qui permet de vérifier si
-         *la pièce est toujours en vie sur le plateau de jeu
-         * a méthode vérifie si la liste de pièces "Player1" de l'instance "echiquier" contient la pièce.
-         * Sinon, la méthode vérifie si la liste de pièces "Player2" de l'instance "echiquier" contient la pièce.
-         * Si la pièce est trouvée dans l'une de ces listes, la méthode renvoie "true",
-         * sinon elle renvoie "false".
-         */
-        if (this.echiquier.getTurn() == -1) {
-            return this.echiquier.getPlayer1().contains(this);
-        } else {
-            return this.echiquier.getPlayer2().contains(this);
-        }
-
-    }
-
-    public List<Point> getPossilesMoves() {
-        /**
-         * est une méthode de la classe "Piece" qui retourne une liste de tous les déplacements possibles pour la pièce en question sur le plateau de jeu.
-         */
-
-        List<Point> moves = new ArrayList<Point>();
-
-        for (int it : DIRECTIONS) {
-
-            try {
-                moves.add(getPositionIfCanMove(it, 1));
-            } catch (MoveException e) {
-
-            }
-
-        }
-
-        /**
-         * pour ne pas etre dans le trone d'un animal
-         */
-        if (this.echiquier.getTurn() == -1) {
-            moves.remove(new Point(0, 3)); //Le trône de l'adversaire est situé en (0, 3) pour le joueur 1
-        } else {
-            moves.remove(new Point(8, 3));//Le trône de l'adversaire est situé en (8, 3) pour le joueur 2
-            //Cela garantit également que la liste "moves" ne contient que les déplacements possibles de la pièce, en excluant les déplacements interdits sur le trône de l'adversaire.
-        }
-
-        return moves;
-
-
-    }
-
-    public void amInPiege() {
-        /**
-         * permet de vérifier si la pièce est dans un piège après son déplacement. Si elle est dans le piège,
-         * la méthode met la puissance de la pièce à zéro.
-         */
-
-        if (echiquier.getTurn() == -1) {
-            /**
-             * on vérifie  si la postion apres le déplacemetn est dans la zone piege pour rendre
-             * la puissance de la piéce zero par default
-             */
-            if (echiquier.getListPiegePlayer2().contains(this.position)) {
-                this.power = 0;
-            } else {
-                this.power = this.defaultPower;
-            }
-        } else {
-            if (echiquier.getListPiegePlayer1().contains(this.position)) {
-                this.power = 0;
-            } else {
-                this.power = this.defaultPower;
-            }
-
-        }
-
-    }
-
-    public Point getPositionIfCanMove(int direction, int nbrCase) throws MoveException {
-        /**
-         *est une méthode qui renvoie la position d'une pièce d'un jeu d'échecs chinois,
-         *  si elle peut se déplacer dans une certaine direction d'un certain nombre de cases.
-         */
-
-        Point newPosition = null;
-
-        if (direction == ADVANCE) {
-            if (this.color == Color.NOIR) {
-                newPosition = new Point(this.position.getX() - 1, this.position.getY());
-            } else {
-                newPosition = new Point(this.position.getX() + 1, this.position.getY());
-            }
-        } else if (direction == BACK) {
-            if (this.color == Color.NOIR) {
-                newPosition = new Point(this.position.getX() + 1, this.position.getY());
-            } else {
-                newPosition = new Point(this.position.getX() - 1, this.position.getY());
-            }
-        }
-
-        else if (direction == LEFT) {
-            if (this.color == Color.NOIR) {
-                newPosition = new Point(this.position.getX(), this.position.getY() + 1);
-            } else {
-                newPosition = new Point(this.position.getX(), this.position.getY() - 1);
-            }
-        }
-
-        else if (direction == RIGHT) {
-            if (this.color == Color.NOIR) {
-                newPosition = new Point(this.position.getX(), this.position.getY() - 1);
-            } else {
-                newPosition = new Point(this.position.getX(), this.position.getY() + 1);
-            }
-        }
-
-        /**
-         * Si la nouvelle position est sur l'eau, la méthode vérifie si la pièce peut effectuer
-         * un mouvement spécial (si elle est un Rat ou un Lion), dans le cas contraire elle déclenche une exception
-         */
-
-        if (echiquier.isPointWater(newPosition)) {
-            /**
-             * on doit vérifier que la piece deplacée est la souris
-             * ansi que le lion et le tigre peuvent sauter la riviere
-             * sinon si la piece est ni le rat ni le lion ni le tigre on va declancher une erreur
-             */
-            // si un Rat
-            if (this.getSpecialMove() == 1) {
-                // laisser pass
-                System.out.println("je suis Une " + this.pieceIcon() + " je veux traverser l'eau at " + newPosition);
-            } else if (this.getSpecialMove() == 2) {
-                // si le tigre ou le lion et que la souris est dans la rivière
-                if ((this.pieceIcon() == "T" || this.pieceIcon() == "L") && echiquier.isPointWater(this.position)) {
-                    System.out.println("Le tigre ou le lion ne peut plus sauter la rivière");
-                    throw new MoveException();
-                } else {
-                    /**
-                     * le saut de la riviere du lion ou du tigre
-                     */
-                    int nbrX = newPosition.getX() - this.position.getX();
-                    int nbrY = newPosition.getY() - this.position.getY();
-                    System.out.println("From " + this.position + "To " + newPosition);
-                    System.out.println("Nbr X " + nbrX + " nbr Y " + nbrY);
-
-                    newPosition.setX(newPosition.getX() + nbrX * 3);
-                    newPosition.setY(newPosition.getY() + nbrY * 2);
-                    System.out.println("je suis Une " + this.pieceIcon() + "  je veux traverser l'eau at " + newPosition);
-                }
-            } else {
-                System.out.println("vous n'avez pas le droit de traverser la revierre");
-                throw new MoveException();
-
-            }
-
-        }
-        // Ce code vérifie si la nouvelle position est en dehors de
-        // l'échiquier en appelant la méthode isPointInEchiquier de l'objet echiquier
-
-        if (!echiquier.isPointInEchiquier(newPosition)) {
-            /**
-             * sinon iv declancher une exeption
-             */
-            System.out.println("position hors echiquier");
-            throw new MoveException();
-        }
-
-
-        /**
-         * vérifie si la case de destination est vide
-         * en appelant la méthode isThereMyPiece
-         * Si la case n'est pas vide, cela signifie qu'il y a déjà une pièce à cet endroit
-         * et le code lance une exception MoveException.
-         */
-        if (!echiquier.isThereMyPiece(newPosition)) {
-            throw new MoveException();
-        }
-
-        /*
-         * param une postion
-         */
-        Piece pieceAt = echiquier.getPieceAt(newPosition);
-
-        /**
-         * la derniere conditon, un elephent ne peut pas manger un rat
-         */
-        if ((pieceAt != null && ((pieceAt.getColor() == this.color) || (pieceAt.getColor() != this.color
-                && ( ((pieceAt.getPower() > this.getDefaultPower()))
-                || (this.getDefaultPower() == 8 && pieceAt.getPower() == 1) )  )  )      ) ) {
-            /**
-             * declancher une erreur les piege sont traiter apres le deplacement
-             */
-            if((pieceAt.getPower() == 8 && this.getDefaultPower() == 1)) {
-                System.out.println("piece at " + pieceAt.getPower() + "  my piece " + this.getDefaultPower());
-            }
-            else {
-                System.out.println("votre piece est de puissance faible par rapport à l'autre piece ");
-                throw new MoveException();
-            }
-        }
-
-        return newPosition;
-    }
-
-    public Point getBestMove() {
-        /**
-         * parmi les possibles moves on va bassser sur un Dataset pour determiner Best
-         * Move
-         */
-        return null;
-    }
-
-    public void movePiece(int direction, int nbrCase) throws MoveException {
-        /**
-         * apres le choix de piece on va le deplacer & synchro with echiquier pour la
-         * mise ajour
-         */
-
-
-        Point newPostion = getPositionIfCanMove(direction, nbrCase);
-
-        Piece pi = echiquier.getPieceAt(newPostion);
-
-        if (pi != null) {
-            echiquier.removePiece(pi);
-        }
-
-        this.position = newPostion;
-
-        /***
-         * @param point on teste si le nouveau deplacement si oui set power to zero
-         *              sinon default power;
-         */
-        System.out.println("Player" + echiquier.getTurn() + " Piece " + this.pieceIcon() + " moved From"
-                + this.getPosition() + " to " + newPostion);
-
-        this.amInPiege();
-
-        echiquier.switchPlayer();
-    }
-
-    /**
-     * pour respecter le mouvement  et special movement  pour chaque animaux && respecte la
-     * place du sanctaire
-     */
-    public abstract void isPossibleMove();
-
-    public void randomMove() {  //permet à une pièce de se déplacer de manière aléatoire parmi les cases où elle peut se déplacer.
-
-        List<Point> possibleMoves = this.getPossilesMoves();
-        if (this.getPossilesMoves().size() != 0) {
-            Random rand = new Random();
-            int randomPiece = rand.nextInt(possibleMoves.size());
-
-            /*
-             * point comme parametre
-             */
-
-            Point newPosition = possibleMoves.get(randomPiece);
-            Piece pi = echiquier.getPieceAt(newPosition);
-
-            if (pi != null) {
-                echiquier.removePiece(pi);
-            }
-
-            System.out.println("Player" + echiquier.getTurn() + " Piece " + this.pieceIcon() + " moved From"
-                    + this.getPosition() + " to " + newPosition);
-            this.position = newPosition;
-
-            this.amInPiege();
-
-            /**
-             * changer de joueur
-             */
-            // echiquier.isTroneGood();
-            echiquier.switchPlayer();
-        }
-    }
-
-    public String pieceIcon() {
-        String namClass = this.getClass().getSimpleName().substring(0, 3);
-        if (this.color == Color.BLANC) {
-            return namClass + " 1";
-        } else {
-            return namClass + " 2";
-        }
-    }
-
-    /******************************
-     *
-     */
-    public Point getDestination(Piece choosenPiece, int direction) {
-        Point currentPosition = choosenPiece.getPosition();
-        Point destination = null;
-        // ... Reste du code de la méthode ...
-        return destination;
-    }
-
-
-
-
-}
-
-
-
-Xampp 
-La base de donnee a le nom xou dou qi
-Le tableu deplacements 
-
-
-CREATE TABLE deplacements ( id INT AUTO_INCREMENT PRIMARY KEY, piece VARCHAR(255) NOT NULL, depart_x INT NOT NULL, depart_y INT NOT NULL, arrivee_x INT NOT NULL, arrivee_y INT NOT NULL, date_deplacement TIMESTAMP DEFAULT CURRENT_TIMESTAMP );
-
